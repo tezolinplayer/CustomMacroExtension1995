@@ -1,0 +1,33 @@
+name: Compilar Plugin DLL
+
+on:
+  push:
+    branches: [ "mestre" ] # Ajustado para o nome da sua branch que aparece na imagem
+  pull_request:
+    branches: [ "mestre" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    - name: Configurar MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Configurar NuGet (Dependências)
+      uses: NuGet/setup-nuget@v1.1
+
+    - name: Restaurar pacotes NuGet
+      run: nuget restore CustomMacroExtension.sln
+
+    - name: Compilar Solução
+      run: msbuild CustomMacroExtension.sln /p:Configuration=Release
+
+    - name: Upload da DLL (Artefato)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Plugin-Compilado
+        path: "**/bin/Release/*.dll" # Isso vai pegar todas as DLLs geradas
