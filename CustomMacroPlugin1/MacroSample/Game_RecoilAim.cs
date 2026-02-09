@@ -6,18 +6,23 @@ namespace CustomMacroPlugin1.MacroSample
     [SortIndex(205)]
     partial class Game_RecoilAim : MacroBase
     {
-        private byte forcaRecoil = 30;
+        // Força Vertical (0 a 100) - Começa puxando para baixo
+        private int forcaVertical = 30;
+        
+        // Força Horizontal (-50 a 50) - Começa neutro (0)
+        // Negativo = Puxa para Esquerda / Positivo = Puxa para Direita
+        private int forcaHorizontal = 0;
+        
         private int tickCount = 0;
 
         public override void Init()
         {
-            MainGate.Text = "Daniel Elite Mod";
+            MainGate.Text = "Daniel Elite Mod V2";
 
-            // Menu de Opções
-            MainGate.Add(CreateTVN("Ativar Anti-Recoil"));  // [0]
-            MainGate.Add(CreateTVN("Ativar Rapid Fire"));   // [1]
-            MainGate.Add(CreateTVN("Ativar Drop Shot"));    // [2]
-            MainGate.Add(CreateTVN("Ativar Slide Cancel")); // [3]
+            MainGate.Add(CreateTVN("Ativar Anti-Recoil")); // [0]
+            MainGate.Add(CreateTVN("Ativar Rapid Fire"));  // [1]
+            MainGate.Add(CreateTVN("Ativar Drop Shot"));   // [2]
+            MainGate.Add(CreateTVN("Ativar Slide Cancel"));// [3]
         }
 
         public override void UpdateState()
@@ -25,37 +30,50 @@ namespace CustomMacroPlugin1.MacroSample
             if (MainGate.Enable is false) return;
             tickCount++;
 
-            // --- AJUSTE SECRETO DE FORÇA (Segure L1 + Setinhas) ---
-            // L1 é botão (bool), então usamos direto
+            // --- MENU DE AJUSTE RÁPIDO (Segure L1) ---
             if (RealDS4.L1)
             {
-                if (RealDS4.DpadUp && tickCount % 5 == 0 && forcaRecoil < 250) forcaRecoil++;
-                if (RealDS4.DpadDown && tickCount % 5 == 0 && forcaRecoil > 0) forcaRecoil--;
+                // Ajuste Vertical (Cima/Baixo)
+                if (RealDS4.DpadUp && tickCount % 5 == 0 && forcaVertical < 100) forcaVertical++;
+                if (RealDS4.DpadDown && tickCount % 5 == 0 && forcaVertical > 0) forcaVertical--;
+
+                // Ajuste Horizontal (Esquerda/Direita)
+                // Se a arma sobe para a direita, aperte ESQUERDA para compensar
+                if (RealDS4.DpadLeft && tickCount % 5 == 0 && forcaHorizontal > -50) forcaHorizontal--;
+                // Se a arma sobe para a esquerda, aperte DIREITA para compensar
+                if (RealDS4.DpadRight && tickCount % 5 == 0 && forcaHorizontal < 50) forcaHorizontal++;
             }
 
-            // 1. Anti-Recoil
-            // R2 é gatilho (byte 0-255), então verificamos se a pressão é maior que 50
+            // 1. Lógica Anti-Recoil (Aplica Vertical e Horizontal)
             if (MainGate[0].Enable && RealDS4.R2 > 50)
             {
-                int novaPosicao = RealDS4.RY + forcaRecoil;
-                if (novaPosicao > 255) novaPosicao = 255;
-                VirtualDS4.RY = (byte)novaPosicao;
+                // --- VERTICAL (RY) ---
+                int novoY = RealDS4.RY + forcaVertical;
+                if (novoY > 255) novoY = 255;
+                VirtualDS4.RY = (byte)novoY;
+
+                // --- HORIZONTAL (RX) ---
+                // Soma a força horizontal (que pode ser negativa para esquerda)
+                int novoX = RealDS4.RX + forcaHorizontal;
+                
+                // Proteção para não travar o controle (limite 0 a 255)
+                if (novoX > 255) novoX = 255;
+                if (novoX < 0) novoX = 0;
+                
+                VirtualDS4.RX = (byte)novoX;
             }
 
             // 2. Rapid Fire
-            // Verifica pressão do R2 > 50
             if (MainGate[1].Enable && RealDS4.R2 > 50)
             {
-                // Para apertar o gatilho virtualmente, usamos 255 (máximo)
                 if (tickCount % 3 == 0) VirtualDS4.R2 = 255; 
                 else VirtualDS4.R2 = 0;
             }
 
             // 3. Drop Shot
-            // Só ativa se apertar o R2 até o fundo (> 200)
             if (MainGate[2].Enable && RealDS4.R2 > 200)
             {
-                VirtualDS4.Circle = true; // Botões normais usam true/false
+                VirtualDS4.Circle = true;
             }
 
             // 4. Slide Cancel
