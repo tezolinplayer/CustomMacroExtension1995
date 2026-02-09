@@ -6,7 +6,6 @@ namespace CustomMacroPlugin1.MacroSample
     [SortIndex(205)]
     partial class Game_RecoilAim : MacroBase
     {
-        // Força inicial do Recoil
         private byte forcaRecoil = 30;
         private int tickCount = 0;
 
@@ -14,10 +13,11 @@ namespace CustomMacroPlugin1.MacroSample
         {
             MainGate.Text = "Daniel Elite Mod";
 
-            MainGate.Add(CreateTVN("Ativar Anti-Recoil")); // [0]
-            MainGate.Add(CreateTVN("Ativar Rapid Fire"));  // [1]
-            MainGate.Add(CreateTVN("Ativar Drop Shot"));   // [2]
-            MainGate.Add(CreateTVN("Ativar Slide Cancel"));// [3]
+            // Menu de Opções
+            MainGate.Add(CreateTVN("Ativar Anti-Recoil"));  // [0]
+            MainGate.Add(CreateTVN("Ativar Rapid Fire"));   // [1]
+            MainGate.Add(CreateTVN("Ativar Drop Shot"));    // [2]
+            MainGate.Add(CreateTVN("Ativar Slide Cancel")); // [3]
         }
 
         public override void UpdateState()
@@ -25,47 +25,40 @@ namespace CustomMacroPlugin1.MacroSample
             if (MainGate.Enable is false) return;
             tickCount++;
 
-            // --- AJUSTE DE FORÇA (Segure L1 + Cima/Baixo) ---
+            // --- AJUSTE SECRETO DE FORÇA (Segure L1 + Setinhas) ---
+            // L1 é botão (bool), então usamos direto
             if (RealDS4.L1)
             {
-                // Aumenta força
-                if (RealDS4.DpadUp && tickCount % 5 == 0) 
-                {
-                    if(forcaRecoil < 250) forcaRecoil++;
-                }
-                // Diminui força
-                if (RealDS4.DpadDown && tickCount % 5 == 0)
-                {
-                    if(forcaRecoil > 0) forcaRecoil--;
-                }
+                if (RealDS4.DpadUp && tickCount % 5 == 0 && forcaRecoil < 250) forcaRecoil++;
+                if (RealDS4.DpadDown && tickCount % 5 == 0 && forcaRecoil > 0) forcaRecoil--;
             }
 
-            // 1. Anti-Recoil (Se R2 estiver apertado)
-            if (MainGate[0].Enable && RealDS4.R2)
+            // 1. Anti-Recoil
+            // R2 é gatilho (byte 0-255), então verificamos se a pressão é maior que 50
+            if (MainGate[0].Enable && RealDS4.R2 > 50)
             {
-                // Pega a posição atual (RY) e soma a força
                 int novaPosicao = RealDS4.RY + forcaRecoil;
-                
-                // Limite para não estourar o valor máximo (255)
                 if (novaPosicao > 255) novaPosicao = 255;
-
                 VirtualDS4.RY = (byte)novaPosicao;
             }
 
             // 2. Rapid Fire
-            if (MainGate[1].Enable && RealDS4.R2)
+            // Verifica pressão do R2 > 50
+            if (MainGate[1].Enable && RealDS4.R2 > 50)
             {
-                if (tickCount % 3 == 0) VirtualDS4.R2 = true;
-                else VirtualDS4.R2 = false;
+                // Para apertar o gatilho virtualmente, usamos 255 (máximo)
+                if (tickCount % 3 == 0) VirtualDS4.R2 = 255; 
+                else VirtualDS4.R2 = 0;
             }
 
             // 3. Drop Shot
-            if (MainGate[2].Enable && RealDS4.R2)
+            // Só ativa se apertar o R2 até o fundo (> 200)
+            if (MainGate[2].Enable && RealDS4.R2 > 200)
             {
-                VirtualDS4.Circle = true;
+                VirtualDS4.Circle = true; // Botões normais usam true/false
             }
 
-            // 4. Slide Cancel (Se Círculo estiver apertado)
+            // 4. Slide Cancel
             if (MainGate[3].Enable && RealDS4.Circle)
             {
                 VirtualDS4.Cross = true;
