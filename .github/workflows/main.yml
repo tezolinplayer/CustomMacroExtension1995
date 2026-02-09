@@ -2,9 +2,10 @@ name: Compilar Plugin DLL
 
 on:
   push:
-    branches: [ "mestre" ] # Ajustado para o nome da sua branch que aparece na imagem
+    branches: [ "mestre" ]
   pull_request:
     branches: [ "mestre" ]
+  workflow_dispatch: # <--- Esta linha habilita o botão manual que você precisa
 
 jobs:
   build:
@@ -30,4 +31,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Plugin-Compilado
-        path: "**/bin/Release/*.dll" # Isso vai pegar todas as DLLs geradas
+        path: "**/bin/Release/*.dll"
