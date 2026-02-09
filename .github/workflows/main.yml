@@ -15,20 +15,19 @@ jobs:
     - name: Checkout do código
       uses: actions/checkout@v4
 
-    - name: Configurar MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+    - name: Configurar .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
 
-    - name: Configurar NuGet
-      uses: NuGet/setup-nuget@v1.1
+    - name: Restaurar dependências
+      run: dotnet restore CustomMacroExtension.sln
 
-    - name: Restaurar pacotes NuGet
-      run: nuget restore CustomMacroExtension.sln
+    - name: Compilar Plugin
+      run: dotnet build CustomMacroExtension.sln --configuration Release
 
-    - name: Compilar Solução
-      run: msbuild CustomMacroExtension.sln /p:Configuration=Release /p:Platform="x64"
-
-    - name: Upload da DLL (Artefato)
+    - name: Upload da DLL
       uses: actions/upload-artifact@v4
       with:
-        name: Plugin-Daniel-Compilado
-        path: "**/bin/x64/Release/net8.0-windows7.0/*.dll" # Caminho exato que apareceu no seu erro
+        name: Plugin-Daniel-Net8
+        path: "**/bin/Release/net8.0-windows7.0/*.dll"
