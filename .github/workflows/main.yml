@@ -1,4 +1,4 @@
-name: Compilar Plugin DLL
+name: Compilar Plugin Daniel
 
 on:
   push:
@@ -21,13 +21,13 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restaurar dependências
-      run: dotnet restore CustomMacroExtension.sln
+      run: dotnet restore CustomMacroPlugin1/CustomMacroPlugin1.csproj
 
-    - name: Compilar Plugin (x64)
-      run: dotnet build CustomMacroExtension.sln --configuration Release --arch x64
+    - name: Compilar apenas o Plugin 1
+      run: dotnet build CustomMacroPlugin1/CustomMacroPlugin1.csproj --configuration Release --output ./output-dll
 
-    - name: Upload da DLL
+    - name: Upload da DLL (Artefato)
       uses: actions/upload-artifact@v4
       with:
-        name: Plugin-Daniel-x64
-        path: "**/bin/x64/Release/net8.0-windows7.0/*.dll"
+        name: Plugin-Daniel-Net8
+        path: "./output-dll/CustomMacroPlugin1.dll"
