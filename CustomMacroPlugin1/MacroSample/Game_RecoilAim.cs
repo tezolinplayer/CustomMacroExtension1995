@@ -6,16 +6,14 @@ namespace CustomMacroPlugin1.MacroSample
     [SortIndex(205)]
     partial class Game_RecoilAim : MacroBase
     {
-        // Variável para guardar a força do Recoil
-        // Começa em 30. Você pode mudar dentro do jogo segurando L1 + Setinhas.
-        private int forcaRecoil = 30;
+        // Força inicial do Recoil
+        private byte forcaRecoil = 30;
         private int tickCount = 0;
 
         public override void Init()
         {
             MainGate.Text = "Daniel Elite Mod";
 
-            // Botões do Menu
             MainGate.Add(CreateTVN("Ativar Anti-Recoil")); // [0]
             MainGate.Add(CreateTVN("Ativar Rapid Fire"));  // [1]
             MainGate.Add(CreateTVN("Ativar Drop Shot"));   // [2]
@@ -27,43 +25,50 @@ namespace CustomMacroPlugin1.MacroSample
             if (MainGate.Enable is false) return;
             tickCount++;
 
-            // --- AJUSTE DE FORÇA IN-GAME ---
-            // Segure L1 e aperte CIMA para aumentar ou BAIXO para diminuir
-            if (RealDS4.L1 > 200)
+            // --- AJUSTE DE FORÇA (Segure L1 + Cima/Baixo) ---
+            if (RealDS4.L1)
             {
-                if (RealDS4.DPad == DPadDirection.North && tickCount % 5 == 0) forcaRecoil++;
-                if (RealDS4.DPad == DPadDirection.South && tickCount % 5 == 0) forcaRecoil--;
+                // Aumenta força
+                if (RealDS4.DpadUp && tickCount % 5 == 0) 
+                {
+                    if(forcaRecoil < 250) forcaRecoil++;
+                }
+                // Diminui força
+                if (RealDS4.DpadDown && tickCount % 5 == 0)
+                {
+                    if(forcaRecoil > 0) forcaRecoil--;
+                }
             }
 
-            // 1. Anti-Recoil (Usando RealDS4 e VirtualDS4)
-            if (MainGate[0].Enable && RealDS4.R2 > 50)
+            // 1. Anti-Recoil (Se R2 estiver apertado)
+            if (MainGate[0].Enable && RealDS4.R2)
             {
-                // Pega a posição atual e soma a força
-                // O limite 255 impede que o valor "dê a volta" e bugue a mira
-                int novaPosicao = RealDS4.RightStickY + forcaRecoil;
-                if (novaPosicao > 255) novaPosicao = 255;
+                // Pega a posição atual (RY) e soma a força
+                int novaPosicao = RealDS4.RY + forcaRecoil;
                 
-                VirtualDS4.RightStickY = (byte)novaPosicao; 
+                // Limite para não estourar o valor máximo (255)
+                if (novaPosicao > 255) novaPosicao = 255;
+
+                VirtualDS4.RY = (byte)novaPosicao;
             }
 
             // 2. Rapid Fire
-            if (MainGate[1].Enable && RealDS4.R2 > 50)
+            if (MainGate[1].Enable && RealDS4.R2)
             {
-                if (tickCount % 3 == 0) VirtualDS4.R2 = 255; // Aperta
-                else VirtualDS4.R2 = 0;   // Solta
+                if (tickCount % 3 == 0) VirtualDS4.R2 = true;
+                else VirtualDS4.R2 = false;
             }
 
             // 3. Drop Shot
-            if (MainGate[2].Enable && RealDS4.R2 > 200)
+            if (MainGate[2].Enable && RealDS4.R2)
             {
                 VirtualDS4.Circle = true;
             }
 
-            // 4. Slide Cancel (Sequência: Bola, Bola, Xis)
+            // 4. Slide Cancel (Se Círculo estiver apertado)
             if (MainGate[3].Enable && RealDS4.Circle)
             {
-               // Lógica simplificada para slide cancel
-               VirtualDS4.Cross = true;
+                VirtualDS4.Cross = true;
             }
         }
     }
