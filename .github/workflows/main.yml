@@ -5,7 +5,7 @@ on:
     branches: [ "mestre" ]
   pull_request:
     branches: [ "mestre" ]
-  workflow_dispatch: # <--- Esta linha habilita o botão manual que você precisa
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -18,17 +18,17 @@ jobs:
     - name: Configurar MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Configurar NuGet (Dependências)
+    - name: Configurar NuGet
       uses: NuGet/setup-nuget@v1.1
 
     - name: Restaurar pacotes NuGet
       run: nuget restore CustomMacroExtension.sln
 
     - name: Compilar Solução
-      run: msbuild CustomMacroExtension.sln /p:Configuration=Release
+      run: msbuild CustomMacroExtension.sln /p:Configuration=Release /p:Platform="x64"
 
     - name: Upload da DLL (Artefato)
       uses: actions/upload-artifact@v4
       with:
-        name: Plugin-Compilado
-        path: "**/bin/Release/*.dll"
+        name: Plugin-Daniel-Compilado
+        path: "**/bin/x64/Release/net8.0-windows7.0/*.dll" # Caminho exato que apareceu no seu erro
