@@ -6,36 +6,30 @@ namespace CustomMacroPlugin1.MacroSample
     [SortIndex(205)]
     partial class Game_RecoilAim : MacroBase
     {
-        private double recoilVertical = 15;
-        private bool aimColorAtivo = false;
-
         public override void Init()
         {
-            MainGate.Text = "Ajustador Daniel";
+            // Título principal
+            MainGate.Text = "Daniel Mod PS5";
 
-            // Usando CreateTVN para os controles, pois o erro indicou que o framework 
-            // está esperando Nodes de árvore (TreeViewNode)
-            MainGate.Add(CreateTVN("Ativar Recoil"));
+            // Trocamos 'CreateNVN' por 'CreateTVN' porque o seu sistema só aceita este
+            MainGate.Add(CreateTVN("Ativar Anti-Recoil"));
             MainGate.Add(CreateTVN("Ativar Aim Color"));
         }
 
         public override void UpdateState()
         {
-            if (MainGate.Enable is false) return;
+            if (MainGate.Enable is false) { return; }
 
-            // No seu framework, acessamos os Toggles assim:
-            bool recoilLigado = MainGate[0].Enable;
-            aimColorAtivo = MainGate[1].Enable;
-
-            if (recoilLigado)
+            // Trocamos '.Value' por '.Enable' para sumir o erro CS1061
+            if (MainGate[0].Enable) 
             {
-                ExecutarRecoil();
+                // Lógica de Recoil aqui
             }
-        }
 
-        private void ExecutarRecoil()
-        {
-            // Lógica simples de descida de mira
+            if (MainGate[1].Enable) 
+            {
+                // Lógica de Aim Color aqui
+            }
         }
     }
 }
