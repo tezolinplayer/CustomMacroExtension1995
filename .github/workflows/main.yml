@@ -23,11 +23,11 @@ jobs:
     - name: Restaurar dependências
       run: dotnet restore CustomMacroExtension.sln
 
-    - name: Compilar Plugin
-      run: dotnet build CustomMacroExtension.sln --configuration Release
+    - name: Compilar Plugin (x64)
+      run: dotnet build CustomMacroExtension.sln --configuration Release --arch x64
 
     - name: Upload da DLL
       uses: actions/upload-artifact@v4
       with:
-        name: Plugin-Daniel-Net8
-        path: "**/bin/Release/net8.0-windows7.0/*.dll"
+        name: Plugin-Daniel-x64
+        path: "**/bin/x64/Release/net8.0-windows7.0/*.dll"
