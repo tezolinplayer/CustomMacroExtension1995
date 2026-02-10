@@ -10,10 +10,12 @@ namespace CustomMacroPlugin1.MacroSample
     [SortIndex(205)]
     partial class Game_RecoilAim : MacroBase
     {
-        // Variáveis internas
+        // --- CONFIGURAÇÕES ---
+        // Começa com força 35. Ajuste no jogo com L1 + Setas
+        private int forcaRecoil = 35;
         private int tickCount = 0;
-        
-        // --- CONFIGURAÇÕES DO AIMBOT ---
+
+        // --- AIMBOT ---
         private int areaBusca = 150; 
         private int tolerancia = 90; 
         private double velocidadePuxada = 0.7; 
@@ -21,23 +23,13 @@ namespace CustomMacroPlugin1.MacroSample
 
         public override void Init()
         {
-            MainGate.Text = "Daniel Pro Mod V6";
+            MainGate.Text = "Daniel Pro Mod V7";
 
-            // [0] Ativador Recoil
-            MainGate.Add(CreateTVN("Ativar Anti-Recoil"));
-            
-            // [1] Rapid Fire
-            MainGate.Add(CreateTVN("Ativar Rapid Fire"));
-            
-            // [2] Drop Shot
-            MainGate.Add(CreateTVN("Ativar Drop Shot"));
-            
-            // [3] Ativador Aimbot
-            MainGate.Add(CreateTVN(">> ATIVAR AIMBOT (Cor)"));
-
-            // [4] A RÉGUA (SLIDER) DE 0 A 100
-            // Nome, Valor Inicial, Mínimo, Máximo, Passo
-            MainGate.Add(CreateTrackBar("Força Anti-Recoil", 35, 0, 100, 1));
+            // Botões que FUNCIONAM na sua versão
+            MainGate.Add(CreateTVN("Ativar Anti-Recoil"));     // [0]
+            MainGate.Add(CreateTVN("Ativar Rapid Fire"));      // [1]
+            MainGate.Add(CreateTVN("Ativar Drop Shot"));       // [2]
+            MainGate.Add(CreateTVN(">> ATIVAR AIMBOT (Cor)")); // [3]
         }
 
         public override void UpdateState()
@@ -46,22 +38,36 @@ namespace CustomMacroPlugin1.MacroSample
             tickCount++;
 
             // =========================================================
-            // 1. CAPTURAR COR (L1 + Triângulo)
+            // 1. COMANDOS DE AJUSTE (L1 MESTRE)
             // =========================================================
-            if (RealDS4.L1 && RealDS4.Triangle)
+            if (RealDS4.L1) // Se L1 estiver apertado
             {
-                if (tickCount % 10 == 0) CapturarCorCentral();
+                // CAPTURAR COR: L1 + Triângulo
+                if (RealDS4.Triangle && tickCount % 10 == 0)
+                {
+                    CapturarCorCentral();
+                }
+
+                // AJUSTAR RECOIL: L1 + Cima (Aumenta)
+                if (RealDS4.DpadUp && tickCount % 5 == 0 && forcaRecoil < 100) 
+                {
+                    forcaRecoil++;
+                }
+
+                // AJUSTAR RECOIL: L1 + Baixo (Diminui)
+                if (RealDS4.DpadDown && tickCount % 5 == 0 && forcaRecoil > 0) 
+                {
+                    forcaRecoil--;
+                }
             }
 
             // =========================================================
-            // 2. ANTI-RECOIL (Usando a Régua)
+            // 2. ANTI-RECOIL
             // =========================================================
+            // Verifica se o gatilho está apertado (> 50 de pressão)
             if (MainGate[0].Enable && RealDS4.R2 > 50)
             {
-                // Pega o valor que você colocou na régua (0 a 100)
-                int forcaDaRegua = MainGate[4].Value;
-
-                int novoY = RealDS4.RY + forcaDaRegua;
+                int novoY = RealDS4.RY + forcaRecoil;
                 if (novoY > 255) novoY = 255;
                 VirtualDS4.RY = (byte)novoY;
             }
@@ -84,7 +90,7 @@ namespace CustomMacroPlugin1.MacroSample
             }
 
             // =========================================================
-            // 5. AIMBOT
+            // 5. AIMBOT (Segure L2)
             // =========================================================
             if (MainGate[3].Enable && RealDS4.L2 > 50)
             {
