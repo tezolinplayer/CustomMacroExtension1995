@@ -11,21 +11,23 @@ namespace CustomMacroPlugin1.MacroSample
     partial class Game_RecoilAim : MacroBase
     {
         // --- CONFIGURAÇÕES ---
-        // Começa com força 35. Ajuste no jogo com L1 + Setas
+        // Força inicial do Recoil (ajuste depois com L1+Setas)
         private int forcaRecoil = 35;
         private int tickCount = 0;
 
-        // --- AIMBOT ---
+        // --- CONFIGURAÇÕES DO AIMBOT ---
         private int areaBusca = 150; 
         private int tolerancia = 90; 
         private double velocidadePuxada = 0.7; 
+        
+        // Cor padrão (Vermelho). Será trocada ao usar L1+Triângulo.
         private Color corAlvo = Color.FromArgb(200, 40, 40); 
 
         public override void Init()
         {
             MainGate.Text = "Daniel Pro Mod V7";
 
-            // Botões que FUNCIONAM na sua versão
+            // Apenas botões de Ligar/Desligar (que funcionam 100% no seu sistema)
             MainGate.Add(CreateTVN("Ativar Anti-Recoil"));     // [0]
             MainGate.Add(CreateTVN("Ativar Rapid Fire"));      // [1]
             MainGate.Add(CreateTVN("Ativar Drop Shot"));       // [2]
@@ -38,9 +40,9 @@ namespace CustomMacroPlugin1.MacroSample
             tickCount++;
 
             // =========================================================
-            // 1. COMANDOS DE AJUSTE (L1 MESTRE)
+            // 1. MENU SECRETO NO CONTROLE (Segure L1)
             // =========================================================
-            if (RealDS4.L1) // Se L1 estiver apertado
+            if (RealDS4.L1) 
             {
                 // CAPTURAR COR: L1 + Triângulo
                 if (RealDS4.Triangle && tickCount % 10 == 0)
@@ -48,13 +50,13 @@ namespace CustomMacroPlugin1.MacroSample
                     CapturarCorCentral();
                 }
 
-                // AJUSTAR RECOIL: L1 + Cima (Aumenta)
+                // AUMENTAR RECOIL: L1 + Seta Cima
                 if (RealDS4.DpadUp && tickCount % 5 == 0 && forcaRecoil < 100) 
                 {
                     forcaRecoil++;
                 }
 
-                // AJUSTAR RECOIL: L1 + Baixo (Diminui)
+                // DIMINUIR RECOIL: L1 + Seta Baixo
                 if (RealDS4.DpadDown && tickCount % 5 == 0 && forcaRecoil > 0) 
                 {
                     forcaRecoil--;
@@ -64,7 +66,6 @@ namespace CustomMacroPlugin1.MacroSample
             // =========================================================
             // 2. ANTI-RECOIL
             // =========================================================
-            // Verifica se o gatilho está apertado (> 50 de pressão)
             if (MainGate[0].Enable && RealDS4.R2 > 50)
             {
                 int novoY = RealDS4.RY + forcaRecoil;
